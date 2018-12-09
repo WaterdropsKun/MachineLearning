@@ -1,18 +1,18 @@
 import cv2
 
+# OpenCV人脸识别分类器
+classifier = cv2.CascadeClassifier("./Resource/config/haarcascade_frontalface_default.xml")
+
 filepath = "./Resource/jiance-2.png"
 img = cv2.imread(filepath)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# OpenCV人脸识别分类器
-classifier = cv2.CascadeClassifier("./Resource/config/haarcascade_frontalface_default.xml")
-
-# 定义绘制颜色
-color = (0, 255, 0)
-
 # 调用识别人脸
 faceRects = classifier.detectMultiScale(
     gray, scaleFactor=1.2, minNeighbors=3, minSize=(32, 32))
+
+# 标记人脸
+color = (0, 255, 0)
 if len(faceRects):
     for faceRect in faceRects:
         x, y, w, h = faceRect
@@ -27,7 +27,6 @@ if len(faceRects):
                       (x + 5 * w // 8, y + 7 * h // 8), color)
 
 cv2.imshow("image", img)
-c = cv2.waitKey(10)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

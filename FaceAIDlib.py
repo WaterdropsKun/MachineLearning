@@ -75,8 +75,8 @@ cap = cv2.VideoCapture(0)
 while (1):
     ret, img = cap.read()
     imgTmp = img.copy()
-    faces_detection(imgTmp, img)
 
+    faces_detection(imgTmp, img)
     # faces_recognition(imgTmp, img)
 
     if cv2.waitKey(40) & 0xFF == ord('q'):
