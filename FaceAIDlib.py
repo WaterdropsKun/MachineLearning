@@ -3,6 +3,25 @@
 import cv2
 import dlib
 
+import os
+import face_recognition
+
+# config
+face_recognition_image_path = "./Resource/config/face_recognition"
+total_face_name = []
+total_face_encoding = []
+for file_name in os.listdir(face_recognition_image_path):
+    print(face_recognition_image_path + "/" + file_name)
+
+    total_face_encoding.append(
+        face_recognition.face_encodings(
+            face_recognition.load_image_file(face_recognition_image_path + "/" + file_name)
+        )[0]
+    )
+
+    file_name = file_name[:(len(file_name) - 4)]
+    total_face_name.append(file_name)
+
 # 人脸分类器
 detector = dlib.get_frontal_face_detector()
 # 人脸检测器
@@ -10,9 +29,11 @@ predictor = dlib.shape_predictor(
     "./Resource/config/shape_predictor_68_face_landmarks.dat"
 )
 
-def face_detection(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+def faces_detection(imgTmp, img):
+    gray = cv2.cvtColor(imgTmp, cv2.COLOR_BGR2GRAY)
     faces = detector(gray, 1)
+
     for face in faces:
         left = face.left()
         top = face.top()
@@ -20,7 +41,7 @@ def face_detection(img):
         bottom = face.bottom()
         cv2.rectangle(img, (left, top), (right, bottom), (0, 255, 0), 2)
 
-        shape = predictor(img, face)
+        shape = predictor(imgTmp, face)
         for pt in shape.parts():
             pt_pos = (pt.x, pt.y)
             cv2.circle(img, pt_pos, 2, (0, 255, 0), 1)
@@ -28,11 +49,37 @@ def face_detection(img):
     cv2.imshow("img", img)
 
 
+def faces_recognition(imgTmp, img):
+    face_locations = face_recognition.face_locations(imgTmp)
+    face_encodings = face_recognition.face_encodings(imgTmp, face_locations)
+
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # 人脸识别
+        name = "Unknow"
+        for i, v in enumerate(total_face_encoding):
+            match = face_recognition.compare_faces(
+                [v], face_encoding, tolerance=0.5
+            )
+            if match[0]:
+                name = total_face_name[i]
+                break
+
+        # 人脸标签
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(img, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+    cv2.imshow("img", img)
+
+
 cap = cv2.VideoCapture(0)
 while (1):
     ret, img = cap.read()
-    face_detection(img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    imgTmp = img.copy()
+    faces_detection(imgTmp, img)
+
+    # faces_recognition(imgTmp, img)
+
+    if cv2.waitKey(40) & 0xFF == ord('q'):
         break
 
 cap.release()
