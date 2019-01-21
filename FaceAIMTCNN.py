@@ -1,10 +1,11 @@
 import tensorflow as tf
-import Resource.config.align.detect_face as detect_face
-
 import numpy as np
-
 import cv2 as cv
 
+import Resource.config.align.detect_face as detect_face
+
+
+count = 0   # DebugMK: 抓图
 
 with tf.Graph().as_default():
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
@@ -13,7 +14,10 @@ with tf.Graph().as_default():
         pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
 
 
-def detection(image):
+def faces_detection(image):
+    global count   # DebugMK: 抓图
+    count += 1  # DebugMK: 抓图
+
     minsize = 20  # minimum size of face
     threshold = [0.6, 0.7, 0.7]  # three steps's threshold
     factor = 0.709  # scale factor
@@ -27,6 +31,10 @@ def detection(image):
         print("Can't detect face in the frame")
         return None
     print("Num %d faces detected"% len(bounding_boxes))
+
+    # DebugMK: 抓图
+    if count % 5 == 0:
+        cv.imwrite("./Resource/snap/" + str(count) + ".jpg", frame)
 
     bgr = cv.cvtColor(image, cv.COLOR_RGB2BGR)
     for i in range(len(bounding_boxes)):
@@ -42,26 +50,27 @@ def detection(image):
     return bgr
 
 
-capture = cv.VideoCapture(0)
-height = capture.get(cv.CAP_PROP_FRAME_HEIGHT)
-width = capture.get(cv.CAP_PROP_FRAME_WIDTH)
-out = cv.VideoWriter("./Resource/mtcnn_demo.mp4", cv.VideoWriter_fourcc('D', 'I', 'V', 'X'), 15,
-                             (np.int(width), np.int(height)), True)
+if __name__ == '__main__':
+    capture = cv.VideoCapture(0)
+    height = capture.get(cv.CAP_PROP_FRAME_HEIGHT)
+    width = capture.get(cv.CAP_PROP_FRAME_WIDTH)
+    out = cv.VideoWriter("./Resource/mtcnn_demo.mp4", cv.VideoWriter_fourcc('D', 'I', 'V', 'X'), 15,
+                                 (np.int(width), np.int(height)), True)
 
-while True:
-    ret, frame = capture.read()
-    if ret is True:
-        frame = cv.flip(frame, 1)
-        cv.imshow("frame", frame)
-        rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-        result = detection(rgb)
+    while True:
+        ret, frame = capture.read()
+        if ret is True:
+            # frame = cv.flip(frame, 0)
+            cv.imshow("frame", frame)
+            rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+            img_result = faces_detection(rgb)
 
-        out.write(result)
+            # out.write(img_result)   # DebugMK: 视频
 
-        c = cv.waitKey(10)
-        if c == 27:
+            c = cv.waitKey(10)
+            if c == 27:
+                break
+        else:
             break
-    else:
-        break
 
-cv.destroyAllWindows()
+    cv.destroyAllWindows()

@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QMainWindow
 
 import sys
 
-
 # Ui
 from Ui.MainWindow import Ui_MainWindow
 

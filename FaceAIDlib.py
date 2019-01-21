@@ -1,26 +1,10 @@
 #coding = utf-8
+import os
 
 import cv2
 import dlib
-
-import os
 import face_recognition
 
-# config
-face_recognition_image_path = "./Resource/config/face_recognition"
-total_face_name = []
-total_face_encoding = []
-for file_name in os.listdir(face_recognition_image_path):
-    print(face_recognition_image_path + "/" + file_name)
-
-    total_face_encoding.append(
-        face_recognition.face_encodings(
-            face_recognition.load_image_file(face_recognition_image_path + "/" + file_name)
-        )[0]
-    )
-
-    file_name = file_name[:(len(file_name) - 4)]
-    total_face_name.append(file_name)
 
 # 人脸分类器
 detector = dlib.get_frontal_face_detector()
@@ -28,6 +12,24 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(
     "./Resource/config/shape_predictor_68_face_landmarks.dat"
 )
+
+total_face_name = []
+total_face_encoding = []
+
+
+def init():
+    face_recognition_image_path = "./Resource/config/face_recognition"
+    for file_name in os.listdir(face_recognition_image_path):
+        print(face_recognition_image_path + "/" + file_name)
+
+        total_face_encoding.append(
+            face_recognition.face_encodings(
+                face_recognition.load_image_file(face_recognition_image_path + "/" + file_name)
+            )[0]
+        )
+
+        file_name = file_name[:(len(file_name) - 4)]
+        total_face_name.append(file_name)
 
 
 def faces_detection(imgTmp, img):
@@ -58,7 +60,7 @@ def faces_recognition(imgTmp, img):
         name = "Unknow"
         for i, v in enumerate(total_face_encoding):
             match = face_recognition.compare_faces(
-                [v], face_encoding, tolerance=0.5
+                [v], face_encoding, tolerance=0.3
             )
             if match[0]:
                 name = total_face_name[i]
@@ -71,16 +73,23 @@ def faces_recognition(imgTmp, img):
     cv2.imshow("img", img)
 
 
-cap = cv2.VideoCapture(0)
-while (1):
-    ret, img = cap.read()
-    imgTmp = img.copy()
+if __name__ == '__main__':
+    init()
 
-    faces_detection(imgTmp, img)
-    # faces_recognition(imgTmp, img)
+    cap = cv2.VideoCapture(0)
+    while True:
+        ret, img = cap.read()
+        if ret is True:
+            imgTmp = img.copy()
 
-    if cv2.waitKey(40) & 0xFF == ord('q'):
-        break
+            # faces_detection(imgTmp, img)
+            faces_recognition(imgTmp, img)
 
-cap.release()
-cv2.destroyAllWindows()
+            if cv2.waitKey(40) & 0xFF == ord('q'):
+                cv2.imwrite("./Resource/config/face_recognition/img.jpg", imgTmp)
+                break
+        else:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
