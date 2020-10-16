@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ChildWidgt.ui'
+# Form implementation generated from reading ui file 'e:\Test\Code\Python\MachineLearning\Ui\ChildWidgt.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_ChildWidgt(object):
     def setupUi(self, ChildWidgt):
@@ -24,4 +26,3 @@ class Ui_ChildWidgt(object):
     def retranslateUi(self, ChildWidgt):
         _translate = QtCore.QCoreApplication.translate
         ChildWidgt.setWindowTitle(_translate("ChildWidgt", "Form"))
-
